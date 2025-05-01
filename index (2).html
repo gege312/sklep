@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Sklep Internetowy</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      color: #f0f0f0;
+    }
+    h1 { color: #ffffff; }
+    .section {
+      margin-bottom: 40px;
+      padding: 20px;
+      background: #1e1e1e;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.05);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    input, select, button {
+      padding: 12px 16px;
+      margin: 6px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #2a2a2a;
+      color: #f0f0f0;
+    }
+    button {
+      background-color: #0070f3;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #005bb5;
+    }
+    .product {
+      border: 1px solid #333;
+      background: #1a1a1a;
+      padding: 16px;
+      margin: 10px;
+      display: inline-block;
+      border-radius: 10px;
+      width: 200px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+    .product h3 {
+      color: #f8f8f8;
+      margin-bottom: 10px;
+    }
+    .product p {
+      color: #ccc;
+      font-size: 16px;
+    }
+    #cart {
+      background: #222;
+      padding: 20px;
+      border-radius: 10px;
+      color: #eee;
+    }
+    #paypal-button-container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Sklep Internetowy</h1>
+
+  <div class="section" id="products">
+    <div class="product">
+      <h3>Koszulka czarna</h3>
+      <p>Rozmiary: S, M, L</p>
+      <p>Cena: 20 zł</p>
+      <button onclick="addToCart('Koszulka czarna', 20)">Dodaj do koszyka</button>
+    </div>
+    <div class="product">
+      <h3>Spodnie białe</h3>
+      <p>Rozmiary: M, L, XL</p>
+      <p>Cena: 40 zł</p>
+      <button onclick="addToCart('Spodnie białe', 40)">Dodaj do koszyka</button>
+    </div>
+    <div class="product">
+      <h3>Buty sportowe</h3>
+      <p>Rozmiary: 41-46</p>
+      <p>Cena: 100 zł</p>
+      <button onclick="addToCart('Buty sportowe', 100)">Dodaj do koszyka</button>
+    </div>
+  </div>
+
+  <div class="section" id="cart">
+    <h2>Koszyk</h2>
+    <ul id="cart-items"></ul>
+    <p><strong>Suma:</strong> <span id="total">0</span> zł</p>
+    <div id="paypal-button-container"></div>
+  </div>
+
+  <script>
+    const cart = [];
+
+    function addToCart(name, price) {
+      cart.push({ name, price });
+      updateCart();
+    }
+
+    function updateCart() {
+      const cartItems = document.getElementById('cart-items');
+      const total = document.getElementById('total');
+      cartItems.innerHTML = '';
+      let sum = 0;
+      cart.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = `${item.name} - ${item.price} zł`;
+        cartItems.appendChild(li);
+        sum += item.price;
+      });
+      total.textContent = sum.toFixed(2);
+    }
+  </script>
+
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=PLN"></script>
+  <script>
+    paypal.Buttons({
+      createOrder: function(data, actions) {
+        const total = cart.reduce((sum, item) => sum + item.price, 0);
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: total.toFixed(2)
+            }
+          }]
+        });
+      },
+      onApprove: function(data, actions) {
+        return actions.order.capture().then(function(details) {
+          alert('Dziękujemy za zakup, ' + details.payer.name.given_name + '!');
+        });
+      }
+    }).render('#paypal-button-container');
+  </script>
+
+</body>
+</html>
